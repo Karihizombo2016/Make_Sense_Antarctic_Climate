@@ -1,0 +1,102 @@
+import numpy as np
+import pandas as pd
+import seaborn as sns; sns.set();
+import matplotlib.pyplot as plt
+
+# Load stations info
+stations_elevations = pd.read_excel('station_elevations.xlsx', sheet_name='Sheet1')
+
+# Load all the stations and replace missing values in station_pressure column by mean
+amundsen_scott_qc = pd.read_csv('amundsen_scott_qc.csv')
+amundsen_scott_qc['station_name'] = 'amundsen_scott'
+
+arturo_prat_qc = pd.read_csv('arturo_prat_qc.csv')
+arturo_prat_qc['station_name'] = 'arturo_prat'
+
+bernardo_o_higgins_qc = pd.read_csv('bernardo_o_higgins_qc.csv')
+bernardo_o_higgins_qc['station_name'] = 'bernardo_o_higgins'
+
+byrd_qc = pd.read_csv('byrd_qc.csv')
+byrd_qc['station_name'] = 'byrd'
+
+davis_qc = pd.read_csv('davis_qc.csv')
+davis_qc['station_name'] = 'davis'
+
+dumont_durville_qc = pd.read_csv('dumont_durville_qc.csv')
+dumont_durville_qc['station_name'] = 'dumont_durville'
+
+esperanza_qc = pd.read_csv('esperanza_qc.csv')
+esperanza_qc['station_name'] = 'esperanza'
+
+marambio_qc = pd.read_csv('marambio_qc.csv')
+marambio_qc['station_name'] = 'marambio'
+
+mawson_qc = pd.read_csv('mawson_qc.csv')
+mawson_qc['station_name'] = 'mawson'
+
+neumayer_qc = pd.read_csv('neumayer_qc.csv')
+neumayer_qc['station_name'] = 'neumayer'
+
+palmer_qc = pd.read_csv('palmer_qc.csv')
+palmer_qc['station_name'] = 'palmer'
+
+san_martin_qc = pd.read_csv('san_martin_qc.csv')
+san_martin_qc['station_name'] = 'san_martin'
+
+syowa_qc = pd.read_csv('syowa_qc.csv')
+syowa_qc['station_name'] = 'syowa'
+
+vostok_qc = pd.read_csv('vostok_qc.csv')
+vostok_qc['station_name'] = 'vostok'
+
+list_df = [amundsen_scott_qc, arturo_prat_qc, bernardo_o_higgins_qc, byrd_qc, davis_qc, dumont_durville_qc,
+          esperanza_qc, marambio_qc, mawson_qc, neumayer_qc, palmer_qc, san_martin_qc, vostok_qc]
+for df in list_df:
+    df['station_pressure (hPa)'].fillna(df['station_pressure (hPa)'].mean(), inplace=True)
+
+# Delete all columns with NaN values
+for df in list_df:
+    df.dropna(axis=1, how='all', inplace=True)
+
+# Vertically concatenate all stations
+all_stations = pd.concat(list_df)
+all_stations.head()
+
+# Drop dew point temperature, visibility and wind direction columns
+all_stations.drop(labels=['dew_point_temperature (degC)', 'visibility (code)', 'wind_direction (deg)'],
+                 axis=1, inplace=True)
+all_stations.head()
+
+sns.heatmap(all_stations.isnull(), yticklabels=False, cbar=False, cmap='viridis');
+plt.xticks(size=13);
+
+# Replace NaN values in station pressure by sea level
+all_stations['station_pressure (hPa)'].fillna(all_stations['sea_level_pressure (hPa)'], inplace=True)
+# all_stations.drop('sea_level_pressure (hPa)', axis=1, inplace=True)
+all_stations.head()
+
+
+# Convert '# observation_time' into time
+import datetime
+all_stations['# observation_time'] = pd.to_datetime(all_stations['# observation_time'])
+all_stations.head()
+
+# Load all stations
+all_stations = pd.read_csv('All_stations_24-Mar-2019.csv')
+all_stations.head()
+
+# Drop NaN
+all_stations.dropna(inplace=True)
+all_stations.reset_index(drop=True, inplace=True)
+all_stations.head()
+
+# Convert first column into datetime
+import datetime
+all_stations['# observation_time'] = pd.to_datetime(all_stations['# observation_time'])
+
+# Create year, month, week_day and hour
+all_stations['year'] = all_stations['# observation_time'].dt.year
+all_stations['month'] = all_stations['# observation_time'].dt.month
+all_stations['week_day'] = all_stations['# observation_time'].dt.day_name()
+all_stations['hour'] = all_stations['# observation_time'].dt.hour
+all_stations.head()
